@@ -8,8 +8,8 @@ RUN go mod download
 
 COPY *.go ./
 
-RUN go build -o /james
+RUN go build -o /app-runner
 
 EXPOSE 3000
 
-CMD [ "/james" ]
+CMD [ "/app-runner" ]
