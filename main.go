@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -11,7 +10,6 @@ import (
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>Woobler's in the yard!</h1>")
-	fmt.Fprint(os.Stdout, "oh hello there, browser dev tools.\n")
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
