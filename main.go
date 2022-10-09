@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +33,7 @@ func pageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	router := chi.NewRouter()
+	router.Use(middleware.Logger)
 	router.Get("/", rootHandler)
 	router.Post("/contact", contactHandler)
 	router.Get("/faq", faqHandler)
