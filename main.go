@@ -2,14 +2,35 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>Woobler's in the yard!</h1>")
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	template, err := template.ParseFiles("templates/home.gohtml")
+	if err != nil {
+		handleTemplateError(err, "parse", w)
+	}
+	err = template.Execute(w, nil)
+	if err != nil {
+		handleTemplateError(err, "execution", w)
+	}
+}
+
+func handleTemplateError(err error, errorType string, w http.ResponseWriter) {
+	if errorType == "parse" {
+		log.Printf("Error parsing the template: %v", err)
+		http.Error(w, "There was an error parsing the template.", http.StatusInternalServerError)
+		return
+	} else {
+		log.Printf("Error executing the template: %v", err)
+		http.Error(w, "Error executing the template.", http.StatusInternalServerError)
+		return
+	}
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +53,7 @@ func pageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
-	router.Get("/", rootHandler)
+	router.Get("/", homeHandler)
 	router.Post("/contact", contactHandler)
 	router.Get("/faq", faqHandler)
 	router.Get("/galleries/{galleryId}", galleryHandler)

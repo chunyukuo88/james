@@ -1,2 +1,10 @@
 <h1>Howzit howzit, {{.Name}}</h1>
 <p>Visited {{.Meta.Visits}} times</p>
+
+<script>
+    const user = {
+        "Name": {{.Name}},
+        "Visits": {{.Meta.Visits}}
+    };
+    console.log(user)
+</script>
