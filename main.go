@@ -11,28 +11,42 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
+type UserMeta struct {
+	Visits int
+}
+
+type User struct {
+	Name string
+	Meta UserMeta
+}
+
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	filePath := filepath.Join("templates", "home.gohtml")
-	pageHandler(w, r, filePath)
+	template, err := template.ParseFiles(filePath)
+	handlePossibleTemplateError(err, "parse", w)
+	hardCodedUserForNow := User{
+		Name: "Moris Borris",
+		Meta: UserMeta{
+			Visits: 5,
+		},
+	}
+	err = template.Execute(w, hardCodedUserForNow)
+	handlePossibleTemplateError(err, "execution", w)
 }
-
 func contactHandler(w http.ResponseWriter, r *http.Request) {
 	filePath := filepath.Join("templates", "contact.gohtml")
-	pageHandler(w, r, filePath)
+	staticPageHandler(w, r, filePath)
 }
-
 func faqHandler(w http.ResponseWriter, r *http.Request) {
 	filePath := filepath.Join("templates", "faq.gohtml")
-	pageHandler(w, r, filePath)
+	staticPageHandler(w, r, filePath)
 }
-
 func galleryHandler(w http.ResponseWriter, r *http.Request) {
 	// galleryId := chi.URLParam(r, "galleryId") TODO: Add this back in once I figure out how dynamic URLs work with templating. Slugs?
 	filePath := filepath.Join("templates", "gallery.gohtml")
-	pageHandler(w, r, filePath)
+	staticPageHandler(w, r, filePath)
 }
-
-func pageHandler(w http.ResponseWriter, r *http.Request, filePath string) {
+func staticPageHandler(w http.ResponseWriter, r *http.Request, filePath string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	template, err := template.ParseFiles(filePath)
 	handlePossibleTemplateError(err, "parse", w)
