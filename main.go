@@ -5,45 +5,53 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	template, err := template.ParseFiles("templates/home.gohtml")
-	if err != nil {
-		handleTemplateError(err, "parse", w)
-	}
-	err = template.Execute(w, nil)
-	if err != nil {
-		handleTemplateError(err, "execution", w)
-	}
-}
-
-func handleTemplateError(err error, errorType string, w http.ResponseWriter) {
-	if errorType == "parse" {
-		log.Printf("Error parsing the template: %v", err)
-		http.Error(w, "There was an error parsing the template.", http.StatusInternalServerError)
-		return
-	} else {
-		log.Printf("Error executing the template: %v", err)
-		http.Error(w, "Error executing the template.", http.StatusInternalServerError)
-		return
-	}
+	filePath := filepath.Join("templates", "home.gohtml")
+	pageHandler(w, r, filePath)
 }
 
 func contactHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<p>hi! To get in touch, email me at alexgochenour at gmail dot com</hp>")
+	filePath := filepath.Join("templates", "contact.gohtml")
+	pageHandler(w, r, filePath)
 }
 
 func faqHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>This is the FAQ page. But no one has asked any questions frequently so there's nothing else here.</h2>")
+	filePath := filepath.Join("templates", "faq.gohtml")
+	pageHandler(w, r, filePath)
 }
 
 func galleryHandler(w http.ResponseWriter, r *http.Request) {
-	galleryId := chi.URLParam(r, "galleryId")
-	fmt.Fprintf(w, "<h1>Welcome to the %v gallery!</h1>", galleryId)
+	// galleryId := chi.URLParam(r, "galleryId") TODO: Add this back in once I figure out how dynamic URLs work with templating. Slugs?
+	filePath := filepath.Join("templates", "gallery.gohtml")
+	pageHandler(w, r, filePath)
+}
+
+func pageHandler(w http.ResponseWriter, r *http.Request, filePath string) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	template, err := template.ParseFiles(filePath)
+	handlePossibleTemplateError(err, "parse", w)
+	err = template.Execute(w, nil)
+	handlePossibleTemplateError(err, "execution", w)
+}
+
+func handlePossibleTemplateError(err error, errorType string, w http.ResponseWriter) {
+	if err != nil {
+		if errorType == "parse" {
+			log.Printf("Error parsing the template: %v", err)
+			http.Error(w, "There was an error parsing the template.", http.StatusInternalServerError)
+			return
+		} else {
+			log.Printf("Error executing the template: %v", err)
+			http.Error(w, "Error executing the template.", http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 func pageNotFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +62,7 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Get("/", homeHandler)
-	router.Post("/contact", contactHandler)
+	router.Get("/contact", contactHandler)
 	router.Get("/faq", faqHandler)
 	router.Get("/galleries/{galleryId}", galleryHandler)
 	router.NotFound(pageNotFoundHandler)
